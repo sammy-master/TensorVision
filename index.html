@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TensorVision — GPU Matrix, Neural Network & Python Automation Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Navigation & Unified Source Code Tree -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">TV</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold tracking-tight text-white">TensorVision</h1>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">v2.5</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">GPU Matrix, PyTorch &amp; Python Lab</p>
+        </div>
+      </div>
+
+      <!-- 4 Interactive Workspaces Switcher -->
+      <div class="workspace-nav" id="workspaceNav">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 pb-1">Interactive Workspaces</div>
+        <button class="ws-btn active" data-ws="benchmark" onclick="switchWorkspace('benchmark')">
+          <span>⚡</span>
+          <span>Benchmark Lab</span>
+          <span class="ws-badge">SIMD / CPU</span>
+        </button>
+        <button class="ws-btn" data-ws="matrix" onclick="switchWorkspace('matrix')">
+          <span>🧮</span>
+          <span>Matrix &amp; Array Lab</span>
+          <span class="ws-badge">A @ B</span>
+        </button>
+        <button class="ws-btn" data-ws="notebooks" onclick="switchWorkspace('notebooks')">
+          <span>📓</span>
+          <span>Notebooks &amp; Code</span>
+          <span class="ws-badge">15 Files</span>
+        </button>
+        <button class="ws-btn" data-ws="automation" onclick="switchWorkspace('automation')">
+          <span>🤖</span>
+          <span>Regex &amp; Automation</span>
+          <span class="ws-badge">RPA / CLI</span>
+        </button>
+      </div>
+
+      <!-- Unified Source Code Repository Explorer -->
+      <div class="file-tree-container" id="sidebarFileTree">
+        <!-- Dynamically populated by js/main.js -->
+      </div>
+
+      <div class="p-3.5 border-t border-white/5 bg-black/30 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="apiStatusDot"></span>
+          <span id="apiStatusText">Engine Ready</span>
+        </div>
+        <span class="font-mono text-[10px] text-slate-500">Saksham Sharma</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Viewport -->
+    <div class="main-area">
+      <!-- Top Context Bar -->
+      <header class="topbar">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/25" id="activeWorkspaceBadge">
+            WORKSPACE 01
+          </span>
+          <h2 class="text-lg font-bold text-white truncate" id="activeWorkspaceTitle">
+            ⚡ Benchmark Lab — CPU Loop vs Vectorized SIMD &amp; Tensor Speedup
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <button class="btn-secondary text-xs" onclick="openFileInExplorer('gpu_matrix_lab/Lab_3_Libraries_PyTorch.ipynb')">
+            <span>🔥</span> PyTorch ROCm Lab
+          </button>
+          <button class="btn-secondary text-xs" onclick="openFileInExplorer('notebooks_and_flask/Design_to_Code_Workbook.ipynb')">
+            <span>📘</span> Bootcamp Workbook
+          </button>
+        </div>
+      </header>
+
+      <!-- ===================================================================
+           WORKSPACE 1: ⚡ BENCHMARK LAB (numpy_vs_loop.py & cpu_time.py)
+      ==================================================================== -->
+      <section class="workspace-panel active" id="ws-benchmark">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Hero Control Bar -->
+          <div class="surface-card">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div class="space-y-1.5 max-w-2xl">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">numpy_vs_loop.py + cpu_time.py</span>
+                  <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20" id="benchEngineLabel">Vectorized C/SIMD Engine</span>
+                </div>
+                <h3 class="text-xl font-bold text-white">Vectorized Array Operations vs Sequential Python Loop</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Adjust array size <code class="text-amber-300 font-mono">N</code> from $10^4$ to $10^7$ elements. Compares pure Python list comprehension (<code class="text-slate-300 font-mono">[x * 2 for x in data_list]</code>) and sequential integer accumulation (<code class="text-slate-300 font-mono">total += i</code>) against contiguous C-array SIMD vectorization (<code class="text-emerald-300 font-mono">data_array * 2</code>).
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <button class="btn-secondary text-xs font-mono" onclick="setBenchmarkSize(100000)">100K</button>
+                <button class="btn-secondary text-xs font-mono" onclick="setBenchmarkSize(1000000)">1M</button>
+                <button class="btn-secondary text-xs font-mono" onclick="setBenchmarkSize(5000000)">5M</button>
+                <button class="btn-secondary text-xs font-mono" onclick="setBenchmarkSize(10000000)">10M</button>
+                <button class="btn-primary" id="runBenchmarkBtn" onclick="executeBenchmark()">
+                  <span>⚡</span> Run Live Benchmark
+                </button>
+              </div>
+            </div>
+
+            <!-- Interactive Slider -->
+            <div class="mt-6 pt-5 border-t border-white/5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-8 space-y-2">
+                <div class="flex justify-between text-xs font-mono">
+                  <span class="text-slate-400">ARRAY DIMENSION (<span class="text-amber-400">SIZE</span>):</span>
+                  <span class="text-white font-bold text-sm tabular-nums" id="benchSizeDisplay">2,500,000 elements</span>
+                </div>
+                <input
+                  type="range"
+                  id="benchSizeSlider"
+                  class="tensor-slider"
+                  min="50000"
+                  max="10000000"
+                  step="50000"
+                  value="2500000"
+                  oninput="onBenchSliderInput(this.value)"
+                />
+                <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                  <span>50,000 ($5\times 10^4$)</span>
+                  <span>2,500,000 ($2.5\times 10^6$)</span>
+                  <span>5,000,000 ($5\times 10^6$)</span>
+                  <span>10,000,000 ($10^7$)</span>
+                </div>
+              </div>
+
+              <div class="lg:col-span-4 bg-black/40 border border-white/5 rounded-lg p-3.5 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] font-mono uppercase text-slate-400">Contiguous RAM Buffer</div>
+                  <div class="text-lg font-mono font-bold text-cyan-400 tabular-nums" id="benchMemoryDisplay">20.00 MB</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] font-mono uppercase text-slate-400">Dtype</div>
+                  <div class="text-xs font-mono text-slate-300">int64 (8 bytes)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 KPI Metrics -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="kpi-card">
+              <span class="kpi-label">Python Loop Latency</span>
+              <span class="kpi-value text-rose-400" id="kpiPythonMs">164.20 ms</span>
+              <span class="kpi-sub font-mono" id="kpiPythonSub">[x * 2 for x in data_list]</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">NumPy Vectorized Latency</span>
+              <span class="kpi-value text-emerald-400" id="kpiNumpyMs">5.12 ms</span>
+              <span class="kpi-sub font-mono" id="kpiNumpySub">data_array * 2 (SIMD)</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Vectorization Speedup</span>
+              <span class="kpi-value text-amber-400" id="kpiSpeedup">32.1x</span>
+              <span class="kpi-sub" id="kpiSpeedupSub">Faster than pure Python loop</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">CPU Sum Accumulator</span>
+              <span class="kpi-value text-cyan-400" id="kpiCpuSumMs">142.80 ms</span>
+              <span class="kpi-sub font-mono truncate" id="kpiCpuSumTotal">Σ = 3,124,998,750,000</span>
+            </div>
+          </div>
+
+          <!-- Speedup Comparison Chart & Live Terminal Output -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 surface-card space-y-5">
+              <div class="surface-card-header">
+                <div>
+                  <h4 class="text-sm font-bold text-white uppercase tracking-wider">Latency &amp; Throughput Comparison</h4>
+                  <p class="text-xs text-slate-400">Lower execution bar indicates higher throughput</p>
+                </div>
+                <span class="text-xs font-mono text-amber-400" id="chartBadge">N = 2,500,000</span>
+              </div>
+
+              <div class="space-y-4">
+                <!-- Bar 1 -->
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs font-mono">
+                    <span class="text-slate-300">1. Pure Python List Comprehension (<code class="text-rose-400">numpy_vs_loop.py</code>)</span>
+                    <span class="text-rose-400 font-bold tabular-nums" id="barLabelPy">164.20 ms (1.0x)</span>
+                  </div>
+                  <div class="bench-bar-track">
+                    <div class="bench-bar-fill bg-gradient-to-r from-rose-600 to-rose-400 text-white" id="barFillPy" style="width: 100%;">
+                      Dynamic Boxed PyLong Iteration
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bar 2 -->
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs font-mono">
+                    <span class="text-slate-300">2. Sequential Loop Accumulator (<code class="text-amber-400">cpu_time.py</code>)</span>
+                    <span class="text-amber-400 font-bold tabular-nums" id="barLabelCpu">142.80 ms (1.15x)</span>
+                  </div>
+                  <div class="bench-bar-track">
+                    <div class="bench-bar-fill bg-gradient-to-r from-amber-600 to-amber-400 text-slate-950" id="barFillCpu" style="width: 86%;">
+                      for i in range(N): total += i
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bar 3 -->
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs font-mono">
+                    <span class="text-slate-300">3. NumPy Contiguous C/SIMD Vector (<code class="text-emerald-400">data_array * 2</code>)</span>
+                    <span class="text-emerald-400 font-bold tabular-nums" id="barLabelVec">5.12 ms (32.1x)</span>
+                  </div>
+                  <div class="bench-bar-track">
+                    <div class="bench-bar-fill bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950" id="barFillVec" style="width: 8%;">
+                      AVX2 / NEON Vectorized
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bar 4 -->
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs font-mono">
+                    <span class="text-slate-300">4. PyTorch ROCm / CUDA Tensor Kernel (<code class="text-cyan-400">Lab_3_Libraries_PyTorch.ipynb</code>)</span>
+                    <span class="text-cyan-400 font-bold tabular-nums" id="barLabelGpu">0.38 ms (432x)</span>
+                  </div>
+                  <div class="bench-bar-track">
+                    <div class="bench-bar-fill bg-gradient-to-r from-cyan-500 to-indigo-500 text-white" id="barFillGpu" style="width: 4%;">
+                      GPU HBM
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sample Vector Slice Preview -->
+              <div class="pt-3 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+                <span class="text-slate-400">Vector Slice Preview (<code class="text-emerald-400">result[:6] ... result[-4:]</code>):</span>
+                <span class="text-slate-200 bg-black/40 px-2.5 py-1 rounded border border-white/5" id="benchSampleSlice">
+                  [0, 2, 4, 6, 8, 10] ... [4999992, 4999994, 4999996, 4999998]
+                </span>
+              </div>
+            </div>
+
+            <!-- Right Column: Terminal + Source Code Switcher -->
+            <div class="lg:col-span-5 space-y-4">
+              <div class="terminal-box">
+                <div class="terminal-header">
+                  <div class="terminal-dots">
+                    <span class="terminal-dot bg-rose-500"></span>
+                    <span class="terminal-dot bg-amber-500"></span>
+                    <span class="terminal-dot bg-emerald-500"></span>
+                  </div>
+                  <span class="text-[11px] font-mono text-slate-400">benchmark_stdout.log</span>
+                  <button class="text-[11px] font-mono text-amber-400 hover:underline" onclick="executeBenchmark()">Re-run</button>
+                </div>
+                <div class="terminal-body" id="benchTerminalOutput"></div>
+              </div>
+
+              <!-- Quick Source Code Inspection Card -->
+              <div class="surface-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex gap-2">
+                    <button class="btn-secondary text-xs py-1 px-2.5" id="benchCodeTab1" onclick="showBenchSource('numpy_vs_loop')">numpy_vs_loop.py</button>
+                    <button class="btn-secondary text-xs py-1 px-2.5" id="benchCodeTab2" onclick="showBenchSource('cpu_time')">cpu_time.py</button>
+                  </div>
+                  <button class="text-xs font-mono text-cyan-400 hover:underline" onclick="openFileInExplorer(currentBenchSourcePath)">
+                    Open in Code Explorer →
+                  </button>
+                </div>
+                <pre class="bg-[#090b10] border border-white/5 rounded-lg p-3 text-xs font-mono overflow-x-auto max-h-48"><code class="language-python" id="benchSourcePreview"></code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           WORKSPACE 2: 🧮 INTERACTIVE MATRIX & ARRAY PLAYGROUND
+      ==================================================================== -->
+      <section class="workspace-panel" id="ws-matrix">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Matrix Header & Dimension Controls -->
+          <div class="surface-card">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    matrix_multiplication.py + math_array.py + numpy_basic.py
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold text-white">Interactive 2D Tensor GEMM &amp; Vectorized Array Playground</h3>
+                <p class="text-xs text-slate-400">
+                  Edit cells in Matrix $A$ and Matrix $B$ to compute <code class="text-amber-300 font-mono">C = A @ B</code>, element-wise operations, determinants, and step-by-step dot products.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <button class="btn-secondary text-xs font-mono" id="dim2x2Btn" onclick="setMatrixDimension(2)">2×2 Grid</button>
+                <button class="btn-secondary text-xs font-mono" id="dim3x3Btn" onclick="setMatrixDimension(3)">3×3 Grid</button>
+                <button class="btn-secondary text-xs" onclick="loadDefaultMatrices()">Original (matrix_multiplication.py)</button>
+                <button class="btn-secondary text-xs" onclick="randomizeMatrices()">🎲 Randomize</button>
+                <button class="btn-primary text-xs" onclick="computeMatrices()">
+                  <span>🧮</span> Compute A @ B
+                </button>
+              </div>
+            </div>
+
+            <!-- Interactive Matrices Row -->
+            <div class="mt-6 pt-6 border-t border-white/5 grid grid-cols-1 xl:grid-cols-12 gap-6 items-center">
+              <!-- Matrix A -->
+              <div class="xl:col-span-4 flex flex-col items-center">
+                <div class="text-xs font-mono text-amber-400 mb-2 font-semibold">Matrix A = np.array(...)</div>
+                <div class="matrix-bracket-wrap">
+                  <div class="matrix-grid" id="matrixAGrid"></div>
+                </div>
+                <div class="mt-2 text-[11px] font-mono text-slate-400" id="matrixAMeta">shape: (2, 2) | ndim: 2 | size: 4</div>
+              </div>
+
+              <!-- Operator Symbol -->
+              <div class="xl:col-span-1 flex flex-col items-center justify-center">
+                <div class="w-10 h-10 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 font-mono font-bold text-lg flex items-center justify-center">
+                  @
+                </div>
+                <span class="text-[10px] font-mono text-slate-500 mt-1">matmul</span>
+              </div>
+
+              <!-- Matrix B -->
+              <div class="xl:col-span-4 flex flex-col items-center">
+                <div class="text-xs font-mono text-cyan-400 mb-2 font-semibold">Matrix B = np.array(...)</div>
+                <div class="matrix-bracket-wrap teal-bracket">
+                  <div class="matrix-grid" id="matrixBGrid"></div>
+                </div>
+                <div class="mt-2 text-[11px] font-mono text-slate-400" id="matrixBMeta">shape: (2, 2) | ndim: 2 | size: 4</div>
+              </div>
+
+              <!-- Result Matrix C = A @ B -->
+              <div class="xl:col-span-3 flex flex-col items-center">
+                <div class="text-xs font-mono text-emerald-400 mb-2 font-semibold">Result C = A @ B</div>
+                <div class="matrix-bracket-wrap emerald-bracket">
+                  <div class="matrix-grid" id="matrixCGrid"></div>
+                </div>
+                <div class="mt-2 text-[11px] font-mono text-emerald-400" id="matrixExecTime">Computed in 14.2 µs</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Dot Product Breakdown & Additional Matrix Operations -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Dot Product Steps -->
+            <div class="lg:col-span-6 surface-card space-y-4">
+              <div class="surface-card-header">
+                <div>
+                  <h4 class="text-sm font-bold text-white uppercase tracking-wider">Step-by-Step Dot Product Breakdown</h4>
+                  <p class="text-xs text-slate-400">Row $i$ of $A$ $\cdot$ Column $j$ of $B$ $\rightarrow C_{i,j}$</p>
+                </div>
+                <span class="text-xs font-mono text-emerald-400">C[i,j] = Σ A[i,k] × B[k,j]</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="dotProductSteps"></div>
+
+              <!-- Linear Algebra Invariants -->
+              <div class="pt-4 border-t border-white/5 grid grid-cols-3 gap-3 text-center">
+                <div class="bg-black/35 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">det(A)</div>
+                  <div class="text-base font-mono font-bold text-amber-400 tabular-nums" id="statDetA">-2</div>
+                </div>
+                <div class="bg-black/35 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Trace Tr(A)</div>
+                  <div class="text-base font-mono font-bold text-cyan-400 tabular-nums" id="statTraceA">5</div>
+                </div>
+                <div class="bg-black/35 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Tensor Size</div>
+                  <div class="text-base font-mono font-bold text-emerald-400 tabular-nums" id="statSizeA">4 elements</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Element-wise & Boolean Filtering Lab (math_array.py & numpy_basic.py) -->
+            <div class="lg:col-span-6 surface-card space-y-4">
+              <div class="surface-card-header">
+                <div>
+                  <h4 class="text-sm font-bold text-white uppercase tracking-wider">Element-Wise Operations &amp; Boolean Mask Filter</h4>
+                  <p class="text-xs text-slate-400">Live execution of <code class="text-amber-300 font-mono">math_array.py</code> &amp; <code class="text-cyan-300 font-mono">numpy_basic.py</code></p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                <div class="bg-black/40 border border-white/5 rounded-lg p-3">
+                  <div class="text-slate-400 mb-1">Element-Wise Add (A + B)</div>
+                  <pre class="text-amber-300 font-bold" id="elemAddOut"></pre>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-3">
+                  <div class="text-slate-400 mb-1">Hadamard Multiply (A * B)</div>
+                  <pre class="text-cyan-300 font-bold" id="elemMulOut"></pre>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-3">
+                  <div class="text-slate-400 mb-1">Square (A ** 2)</div>
+                  <pre class="text-emerald-300 font-bold" id="elemSqOut"></pre>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-3">
+                  <div class="text-slate-400 mb-1">Square Root (np.sqrt(B))</div>
+                  <pre class="text-indigo-300 font-bold" id="elemSqrtOut"></pre>
+                </div>
+              </div>
+
+              <!-- Interactive Boolean Mask Filter (a[a > threshold]) -->
+              <div class="pt-3 border-t border-white/5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-white">Boolean Mask Filter (<code class="text-amber-400 font-mono">a[a &gt; threshold]</code>)</span>
+                  <span class="text-[11px] font-mono text-slate-400">from math_array.py</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div class="sm:col-span-8">
+                    <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">1D NumPy Array Elements (comma-separated)</label>
+                    <input
+                      type="text"
+                      id="filterArrayInput"
+                      value="10, 20, 30, 40, 50"
+                      oninput="computeMatrices()"
+                      class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div class="sm:col-span-4">
+                    <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">Threshold (&gt; X)</label>
+                    <input
+                      type="number"
+                      id="filterThresholdInput"
+                      value="25"
+                      oninput="computeMatrices()"
+                      class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-amber-400 focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                </div>
+                <div class="bg-black/50 border border-white/5 rounded-lg p-3 text-xs font-mono space-y-1" id="booleanFilterOutput"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           WORKSPACE 3: 📓 NATIVE JUPYTER NOTEBOOK & CODE EXPLORER
+      ==================================================================== -->
+      <section class="workspace-panel" id="ws-notebooks">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- File Info & Action Header -->
+          <div class="surface-card">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30" id="explorerFileTypeBadge">IPYNB NOTEBOOK</span>
+                  <span class="text-xs font-mono text-slate-400" id="explorerFilePath">gpu_matrix_lab/Lab_3_Libraries_PyTorch.ipynb</span>
+                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20" id="explorerOriginBadge">Origin: Project GPU Matrix &amp; Neural Network Benchmark Lab</span>
+                </div>
+                <h3 class="text-xl font-bold text-white" id="explorerFileTitle">Lab 3 — ROCm Libraries, PyTorch &amp; AI Frameworks</h3>
+                <p class="text-xs text-slate-400" id="explorerFileDesc">
+                  Full GPU compute notebook covering AMD ROCm environment verification, C++ rocBLAS GEMM GFLOPS benchmarking, MIOpen 2D convolutions, rocFFT spectral analysis, and PyTorch neural network training.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button class="btn-emerald text-xs" id="runCurrentFileBtn" onclick="runCurrentExplorerFile()">
+                  <span>▶</span> <span id="runCurrentFileBtnText">Execute All Cells</span>
+                </button>
+                <button class="btn-secondary text-xs" onclick="copyCurrentFileSource()">
+                  <span>📋</span> Copy Raw Source
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Filter Pill Bar for all 15 Files -->
+            <div class="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-1.5" id="explorerQuickPills"></div>
+          </div>
+
+          <!-- Dynamic Notebook Renderer OR Python Script + Virtual Terminal -->
+          <div id="notebookViewerContainer" class="space-y-4"></div>
+
+          <div id="pythonViewerContainer" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 surface-card p-0 overflow-hidden flex flex-col">
+              <div class="px-4 py-3 bg-black/40 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  <span class="text-xs font-mono text-slate-300" id="pyCodeHeaderFilename">script.py</span>
+                </div>
+                <span class="text-[11px] font-mono text-slate-500">UTF-8 • Python 3.11</span>
+              </div>
+              <pre class="p-4 text-xs font-mono overflow-x-auto flex-1 bg-[#090b10] m-0"><code class="language-python" id="pyCodeViewerBlock"></code></pre>
+            </div>
+
+            <div class="lg:col-span-5 space-y-4">
+              <!-- Interactive Context Controls for specific Python scripts (app.py, Hello.py, spammer.py) -->
+              <div id="pyInteractiveControls" class="surface-card space-y-3 hidden"></div>
+
+              <div class="terminal-box">
+                <div class="terminal-header">
+                  <div class="terminal-dots">
+                    <span class="terminal-dot bg-rose-500"></span>
+                    <span class="terminal-dot bg-amber-500"></span>
+                    <span class="terminal-dot bg-emerald-500"></span>
+                  </div>
+                  <span class="text-[11px] font-mono text-slate-400" id="pyTerminalHeader">Virtual Python Terminal</span>
+                  <button class="text-[11px] font-mono text-emerald-400 hover:underline" onclick="runCurrentExplorerFile()">▶ Run Script</button>
+                </div>
+                <div class="terminal-body" id="pyTerminalOutput"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           WORKSPACE 4: 🤖 REGEX & MACRO AUTOMATION SANDBOX
+      ==================================================================== -->
+      <section class="workspace-panel" id="ws-automation">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel: Regex Document Number Extractor (2.py / regex_number_extractor.py) -->
+            <div class="lg:col-span-6 surface-card space-y-4">
+              <div class="surface-card-header">
+                <div>
+                  <span class="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    automation_and_utilities/2.py
+                  </span>
+                  <h3 class="text-lg font-bold text-white mt-1">Regex Document Number Extractor</h3>
+                  <p class="text-xs text-slate-400">
+                    Applies <code class="text-amber-300 font-mono">re.findall('[0-9]+', line)</code> across unstructured text and computes statistical aggregates.
+                  </p>
+                </div>
+                <button class="btn-primary text-xs" onclick="runRegexExtractor()">
+                  <span>🔍</span> Extract &amp; Sum
+                </button>
+              </div>
+
+              <!-- Sample Corpus Presets -->
+              <div class="flex flex-wrap gap-1.5">
+                <button class="btn-secondary text-[11px] py-1 px-2.5" onclick="loadRegexPreset('py4e')">Py4E regex_sum_2248121.txt</button>
+                <button class="btn-secondary text-[11px] py-1 px-2.5" onclick="loadRegexPreset('gpu')">ROCm GPU Benchmark Log</button>
+                <button class="btn-secondary text-[11px] py-1 px-2.5" onclick="loadRegexPreset('invoice')">Cloud Cluster Telemetry</button>
+              </div>
+
+              <div>
+                <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">Input Document / Log Stream</label>
+                <textarea
+                  id="regexInputText"
+                  rows="5"
+                  oninput="runRegexExtractor()"
+                  class="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-xs font-mono text-slate-200 focus:border-amber-500 outline-none"
+                >Why should you learn to write programs? 7746
+12 1929 8827
+Writing programs (or programming) is a very creative 7 and rewarding activity.
+You can write programs for many reasons, ranging from making your living to solving 8832 a difficult data analysis problem to having fun to helping 4219 someone else solve a problem.
+GPU Node 04 achieved 18450 GFLOPS across 1024 tensor cores in 19 ms.</textarea>
+              </div>
+
+              <!-- Inline Match Highlighter -->
+              <div>
+                <div class="flex justify-between text-[10px] font-mono text-slate-400 uppercase mb-1">
+                  <span>Inline Token Highlighter (<code class="text-amber-400">[0-9]+</code>)</span>
+                  <span id="regexExecTimeLabel">12.4 µs</span>
+                </div>
+                <div class="regex-highlight-preview" id="regexHighlightedBox"></div>
+              </div>
+
+              <!-- Stats Grid -->
+              <div class="grid grid-cols-4 gap-2.5 text-center">
+                <div class="bg-black/40 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Total Sum</div>
+                  <div class="text-base font-mono font-bold text-amber-400 tabular-nums" id="regexSumStat">0</div>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Count</div>
+                  <div class="text-base font-mono font-bold text-emerald-400 tabular-nums" id="regexCountStat">0</div>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Mean</div>
+                  <div class="text-base font-mono font-bold text-cyan-400 tabular-nums" id="regexMeanStat">0</div>
+                </div>
+                <div class="bg-black/40 border border-white/5 rounded-lg p-2.5">
+                  <div class="text-[10px] font-mono text-slate-400 uppercase">Min / Max</div>
+                  <div class="text-xs font-mono font-bold text-slate-200 tabular-nums mt-1" id="regexMinMaxStat">0 / 0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Panel: PyAutoGUI Macro Simulator (spammer.py) & CLI (Hello.py) -->
+            <div class="lg:col-span-6 space-y-6">
+              <div class="surface-card space-y-4">
+                <div class="surface-card-header">
+                  <div>
+                    <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      automation_and_utilities/spammer.py
+                    </span>
+                    <h3 class="text-lg font-bold text-white mt-1">PyAutoGUI Keystroke Macro Simulator</h3>
+                    <p class="text-xs text-slate-400">
+                      Browser-sandboxed simulator for <code class="text-emerald-300 font-mono">spammer.py</code> with live 5-second countdown and keystroke dispatch telemetry.
+                    </p>
+                  </div>
+                  <button class="btn-emerald text-xs" id="runMacroBtn" onclick="startMacroSimulation()">
+                    <span>🚀</span> Launch Macro Bot
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div class="sm:col-span-6">
+                    <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">Payload Message (msg)</label>
+                    <input
+                      type="text"
+                      id="macroMsgInput"
+                      value="Fire in the hole! TensorVision RPA"
+                      class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <div class="sm:col-span-3">
+                    <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">Repeat (n)</label>
+                    <input
+                      type="number"
+                      id="macroCountInput"
+                      value="5"
+                      min="1"
+                      max="20"
+                      class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-emerald-400 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <div class="sm:col-span-3">
+                    <label class="text-[10px] font-mono text-slate-400 uppercase block mb-1">Delay (sec)</label>
+                    <input
+                      type="number"
+                      id="macroDelayInput"
+                      value="0.3"
+                      step="0.1"
+                      min="0.1"
+                      max="2.0"
+                      class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-amber-400 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <!-- Macro Sandbox Terminal -->
+                <div class="terminal-box">
+                  <div class="terminal-header">
+                    <div class="terminal-dots">
+                      <span class="terminal-dot bg-rose-500"></span>
+                      <span class="terminal-dot bg-amber-500"></span>
+                      <span class="terminal-dot bg-emerald-500"></span>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-400">pyautogui_sandbox_tty</span>
+                    <span class="text-[10px] font-mono text-emerald-400" id="macroStatusBadge">IDLE</span>
+                  </div>
+                  <div class="terminal-body" id="macroTerminalBody" style="min-height: 170px; max-height: 220px;"></div>
+                </div>
+              </div>
+
+              <!-- Interactive Hello.py & Flask app.py Quick Runner Card -->
+              <div class="surface-card space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                      Hello.py + app.py
+                    </span>
+                    <h4 class="text-sm font-bold text-white mt-1">Interactive Stdin Greeting (<code class="font-mono text-cyan-300">Hello.py</code>)</h4>
+                  </div>
+                  <button class="btn-secondary text-xs" onclick="runHelloGreeting()">Run Hello.py</button>
+                </div>
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    id="helloNameInput"
+                    value="Saksham Sharma"
+                    placeholder="Enter Your Name..."
+                    oninput="runHelloGreeting()"
+                    class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <pre class="bg-black/60 border border-white/5 rounded-lg p-3 text-xs font-mono text-cyan-300 whitespace-pre-wrap" id="helloOutputBox"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
